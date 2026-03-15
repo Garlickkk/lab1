@@ -20,7 +20,7 @@ Vector* VectorCreate(size_t size, FieldInfo* type)
         free(vector);
         return NULL;
     }
-    vector->data = calloc(size, type->size);
+    vector->data = malloc(size * type->size);
     if (!vector->data && size > 0)
     {
         free(vector);
@@ -44,57 +44,51 @@ void VectorDestroy(Vector* vector)
 
 // get/set
 
-void* VectorGet(Vector* vector, size_t index)
+void* VectorGet(const Vector* vector, size_t index) // показывает, где лежит элемент
 {
     if (!vector || index >= vector->size)
         return NULL;
 
-    return (char*)vector->data + index * vector->type->size;
-    // Возвращает указатель на элемент с индексом index: (char*)
+    return (char*)vector->data + index * vector->type->size; // возвращает адрес нужного элемента
+    // vector->type->size кол-во байт в 1-м элементе
+    // vector->data - адрес 1-го эл
     // для побайтового смещения, index * размер_элемента = смещение в байтах
+    // (char*) нужен для побайтовой арифметики, т.к. у void* нет размерности
 }
 
-void VectorSet(Vector* vector, size_t index, void* value)
+void VectorSet(Vector* vector, size_t index, const void* value) // кладет значение в нужное место
 {
     if (!vector || !value || index >= vector->size)
         return;
 
     void* dest = (char*)vector->data + index * vector->type->size;
-    memcpy(dest, value, vector->type->size);
+    memcpy(dest, value, vector->type->size); // куда откуда сколько байт
 }
 
-// vector add
-
-Vector* VectorAdd(Vector* v1, Vector* v2)
+void VectorAdd(const Vector* v1, const Vector* v2, Vector* result)
 {
-    if (!v1 || !v2) // не существование вектора
-        return NULL;
+    if (!v1 || !v2 || !result) // проверка существования векторов
+        return;
 
-    if (v1->type != v2->type)
-        return NULL;
+    if (v1->type != v2->type || v1->type != result->type)
+        return;
 
-    if (v1->size != v2->size)
-        return NULL;
-
-    Vector* result = VectorCreate(v1->size, v1->type);
-    if (!result)
-        return NULL;
+    if (v1->size != v2->size || v1->size != result->size)
+        return;
 
     for (size_t i = 0; i < v1->size; i++)
     {
-        void* a = VectorGet(v1, i);
-        void* b = VectorGet(v2, i);
+        const void* a = VectorGet(v1, i);
+        const void* b = VectorGet(v2, i);
         void* dest = VectorGet(result, i);
 
         v1->type->add(a, b, dest);
     }
-
-    return result;
 }
 
 // dot(скалярное произведение)
 
-void VectorDot(Vector* v1, Vector* v2, void* result)
+void VectorDot(const Vector* v1, const Vector* v2, void* result)
 {
     if (!v1 || !v2 || !result)
         return;
@@ -113,8 +107,8 @@ void VectorDot(Vector* v1, Vector* v2, void* result)
 
     for (size_t i = 0; i < v1->size; i++)
     {
-        void* a = VectorGet(v1, i);
-        void* b = VectorGet(v2, i);
+        const void* a = VectorGet(v1, i);
+        const void* b = VectorGet(v2, i);
 
         v1->type->mul(a, b, temp);
         v1->type->add(result, temp, result);
@@ -122,7 +116,8 @@ void VectorDot(Vector* v1, Vector* v2, void* result)
 
     free(temp);
 }
-void print_vector(Vector* v)
+
+void print_vector(const Vector* v)
 {
     if (v == NULL)
     {
@@ -133,17 +128,9 @@ void print_vector(Vector* v)
     printf("[");
     for (size_t i = 0; i < v->size; i++)
     {
-        void* elem = VectorGet(v, i);
+        const void* elem = VectorGet(v, i);
 
-        // определение типа по указателю
-        if (v->type == GetIntFieldInfo())
-        {
-            printf("%d", *(int*)elem);
-        }
-        else if (v->type == GetDoubleFieldInfo())
-        {
-            printf("%.2f", *(double*)elem);
-        }
+        v->type->print(elem);
 
         if (i < v->size - 1) printf(", ");
     }
