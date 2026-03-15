@@ -3,7 +3,7 @@
 #include <math.h>
 #include "vector.h"
 #include "typeinfo.h"
-
+#define EP 1e-9 // число погрешности
 
 
 static Vector* CreateIntVectorFromArray(int* arr, size_t n)
@@ -82,9 +82,9 @@ static void TestDoubleVectorAdd() {
     Vector* sum = VectorAdd(v1, v2);
 
     assert(sum != NULL);
-    assert(fabs(*(double*)VectorGet(sum, 0) - 1.5) < 1e-9);
-    assert(fabs(*(double*)VectorGet(sum, 1) - 3.5) < 1e-9);
-    assert(fabs(*(double*)VectorGet(sum, 2) - 5.5) < 1e-9);
+    assert(fabs(*(double*)VectorGet(sum, 0) - 1.5) < EP);
+    assert(fabs(*(double*)VectorGet(sum, 1) - 3.5) < EP);
+    assert(fabs(*(double*)VectorGet(sum, 2) - 5.5) < EP);
 
     VectorDestroy(v1);
     VectorDestroy(v2);
@@ -116,7 +116,8 @@ static void TestDoubleDotProduct()
 
 // ТЕСТЫ ОШИБОК
 
-static void TestDifferentTypes() {
+static void TestDifferentTypes()
+{
     printf("Test error - different types");
 
     int a[] = {1, 2};
@@ -164,7 +165,7 @@ static void TestNullVectors() {
     printf("OK\n");
 }
 
-/* ================= ЗАПУСК ВСЕХ ================= */
+// запуск тестов
 
 void RunAllTests() {
     printf("\n===================================\n");
