@@ -12,45 +12,39 @@ Vector* create_double_vector_interactive(void);
 void fill_vector_auto(Vector* v);
 void fill_vector_manual(Vector* v);
 
-// Безопасное чтение int (очищает буфер при ошибке ввода)
+// Безопасное чтение, если пользователь вводит не число, заново просит его ввести
 static int safe_scan_int(int* out)
 {
     if (scanf("%d", out) != 1)
     {
-        // очистка буфера до конца строки
+        // очистка буфера
         int c;
-        while ((c = getchar()) != '\n' && c != EOF);
+        while ((c = getchar()) != '\n');
         return 0;
     }
     return 1;
 }
 
-// Безопасное чтение double
+// Безопасное чтение (аналогично)
 static int safe_scan_double(double* out)
 {
     if (scanf("%lf", out) != 1)
     {
         int c;
-        while ((c = getchar()) != '\n' && c != EOF);
+        while ((c = getchar()) != '\n');
         return 0;
     }
     return 1;
 }
 
-
-Vector* g_int_v1 = NULL;
-Vector* g_int_v2 = NULL;
-Vector* g_double_v1 = NULL;
-Vector* g_double_v2 = NULL;
-
-
+Vector* g_v1 = NULL;
+Vector* g_v2 = NULL;
 
 int main(void)
 {
     srand(time(NULL));
 
     int choice;
-
 
     do
     {
@@ -88,30 +82,30 @@ int main(void)
         }
     } while(choice != 0);
 
-
-    if (g_int_v1) VectorDestroy(g_int_v1);
-    if (g_int_v2) VectorDestroy(g_int_v2);
-    if (g_double_v1) VectorDestroy(g_double_v1);
-    if (g_double_v2) VectorDestroy(g_double_v2);
+    if (g_v1) VectorDestroy(g_v1);
+    if (g_v2) VectorDestroy(g_v2);
 
     return 0;
 }
 
-// ---------- МЕНЮ INT ----------
-
+// INT
 void menu_int(void)
 {
     int choice;
-
-
 
     do {
         printf("\n--- ЦЕЛЫЕ ЧИСЛА ---\n");
         printf("Текущие векторы:\n");
         printf("V1: ");
-        if (g_int_v1) print_vector(g_int_v1); else printf("NULL");
+        if (g_v1 && g_v1->type == GetIntFieldInfo())
+            print_vector(g_v1);
+        else
+            printf("NULL");
         printf("\nV2: ");
-        if (g_int_v2) print_vector(g_int_v2); else printf("NULL");
+        if (g_v2 && g_v2->type == GetIntFieldInfo())
+            print_vector(g_v2);
+        else
+            printf("NULL");
         printf("\n\n");
 
         printf("1. Создать новый вектор V1\n");
@@ -133,66 +127,83 @@ void menu_int(void)
         switch(choice)
         {
             case 1:
-                if (g_int_v1) VectorDestroy(g_int_v1);
-                g_int_v1 = create_int_vector_interactive();
+                if (g_v1 && g_v1->type == GetIntFieldInfo())
+                    VectorDestroy(g_v1);
+                g_v1 = create_int_vector_interactive();
                 break;
             case 2:
-                if (g_int_v2) VectorDestroy(g_int_v2);
-                g_int_v2 = create_int_vector_interactive();
+                if (g_v2 && g_v2->type == GetIntFieldInfo())
+                    VectorDestroy(g_v2);
+                g_v2 = create_int_vector_interactive();
                 break;
             case 3:
-                if (g_int_v1 && g_int_v2) {
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetIntFieldInfo() &&
+                    g_v2->type == GetIntFieldInfo()) {
                     printf("Заполнение V1:\n");
-                    fill_vector_manual(g_int_v1);
+                    fill_vector_manual(g_v1);
                     printf("Заполнение V2:\n");
-                    fill_vector_manual(g_int_v2);
+                    fill_vector_manual(g_v2);
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба int вектора!\n");
                 }
                 break;
             case 4:
-                if (g_int_v1 && g_int_v2) {
-                    fill_vector_auto(g_int_v1);
-                    fill_vector_auto(g_int_v2);
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetIntFieldInfo() &&
+                    g_v2->type == GetIntFieldInfo()) {
+                    fill_vector_auto(g_v1);
+                    fill_vector_auto(g_v2);
                     printf("Векторы заполнены случайными числами\n");
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба int вектора!\n");
                 }
                 break;
             case 5:
-                if (g_int_v1 && g_int_v2) {
-                    Vector* result = VectorAdd(g_int_v1, g_int_v2);
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetIntFieldInfo() &&
+                    g_v2->type == GetIntFieldInfo()) {
+                    Vector* result = VectorCreate(g_v1->size, g_v1->type);
                     if (result) {
+                        VectorAdd(g_v1, g_v2, result);
                         printf("Результат сложения: ");
                         print_vector(result);
                         printf("\n");
                         VectorDestroy(result);
                     }
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба int вектора!\n");
                 }
                 break;
             case 6:
-                if (g_int_v1 && g_int_v2) {
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetIntFieldInfo() &&
+                    g_v2->type == GetIntFieldInfo()) {
                     int result;
-                    VectorDot(g_int_v1, g_int_v2, &result);
+                    VectorDot(g_v1, g_v2, &result);
                     printf("Скалярное произведение: %d\n", result);
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба int вектора!\n");
                 }
                 break;
             case 7:
                 printf("V1: ");
-                if (g_int_v1) print_vector(g_int_v1); else printf("NULL");
+                if (g_v1 && g_v1->type == GetIntFieldInfo())
+                    print_vector(g_v1);
+                else
+                    printf("NULL");
                 printf("\nV2: ");
-                if (g_int_v2) print_vector(g_int_v2); else printf("NULL");
+                if (g_v2 && g_v2->type == GetIntFieldInfo())
+                    print_vector(g_v2);
+                else
+                    printf("NULL");
                 printf("\n");
                 break;
         }
     } while(choice != 8);
 }
 
-// ---------- МЕНЮ DOUBLE ----------
+// DOUBLE
 
 void menu_double(void)
 {
@@ -202,9 +213,15 @@ void menu_double(void)
         printf("\n--- ВЕЩЕСТВЕННЫЕ ЧИСЛА (double) ---\n");
         printf("Текущие векторы:\n");
         printf("V1: ");
-        if (g_double_v1) print_vector(g_double_v1); else printf("NULL");
+        if (g_v1 && g_v1->type == GetDoubleFieldInfo())
+            print_vector(g_v1);
+        else
+            printf("NULL");
         printf("\nV2: ");
-        if (g_double_v2) print_vector(g_double_v2); else printf("NULL");
+        if (g_v2 && g_v2->type == GetDoubleFieldInfo())
+            print_vector(g_v2);
+        else
+            printf("NULL");
         printf("\n\n");
 
         printf("1. Создать новый вектор V1 (double)\n");
@@ -226,67 +243,83 @@ void menu_double(void)
         switch(choice)
         {
             case 1:
-                if (g_double_v1) VectorDestroy(g_double_v1);
-                g_double_v1 = create_double_vector_interactive();
+                if (g_v1 && g_v1->type == GetDoubleFieldInfo())
+                    VectorDestroy(g_v1);
+                g_v1 = create_double_vector_interactive();
                 break;
             case 2:
-                if (g_double_v2) VectorDestroy(g_double_v2);
-                g_double_v2 = create_double_vector_interactive();
+                if (g_v2 && g_v2->type == GetDoubleFieldInfo())
+                    VectorDestroy(g_v2);
+                g_v2 = create_double_vector_interactive();
                 break;
             case 3:
-                if (g_double_v1 && g_double_v2) {
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetDoubleFieldInfo() &&
+                    g_v2->type == GetDoubleFieldInfo()) {
                     printf("Заполнение V1:\n");
-                    fill_vector_manual(g_double_v1);
+                    fill_vector_manual(g_v1);
                     printf("Заполнение V2:\n");
-                    fill_vector_manual(g_double_v2);
+                    fill_vector_manual(g_v2);
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба double вектора!\n");
                 }
                 break;
             case 4:
-                if (g_double_v1 && g_double_v2) {
-                    fill_vector_auto(g_double_v1);
-                    fill_vector_auto(g_double_v2);
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetDoubleFieldInfo() &&
+                    g_v2->type == GetDoubleFieldInfo()) {
+                    fill_vector_auto(g_v1);
+                    fill_vector_auto(g_v2);
                     printf("Векторы заполнены случайными числами\n");
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба double вектора!\n");
                 }
                 break;
             case 5:
-                if (g_double_v1 && g_double_v2) {
-                    Vector* result = VectorAdd(g_double_v1, g_double_v2);
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetDoubleFieldInfo() &&
+                    g_v2->type == GetDoubleFieldInfo()) {
+                    Vector* result = VectorCreate(g_v1->size, g_v1->type);
                     if (result) {
+                        VectorAdd(g_v1, g_v2, result);
                         printf("Результат сложения: ");
                         print_vector(result);
                         printf("\n");
                         VectorDestroy(result);
                     }
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба double вектора!\n");
                 }
                 break;
             case 6:
-                if (g_double_v1 && g_double_v2) {
+                if (g_v1 && g_v2 &&
+                    g_v1->type == GetDoubleFieldInfo() &&
+                    g_v2->type == GetDoubleFieldInfo()) {
                     double result;
-                    VectorDot(g_double_v1, g_double_v2, &result);
+                    VectorDot(g_v1, g_v2, &result);
                     printf("Скалярное произведение: %.2f\n", result);
                 } else {
-                    printf("Сначала создайте оба вектора!\n");
+                    printf("Сначала создайте оба double вектора!\n");
                 }
                 break;
             case 7:
                 printf("V1: ");
-                if (g_double_v1) print_vector(g_double_v1); else printf("NULL");
+                if (g_v1 && g_v1->type == GetDoubleFieldInfo())
+                    print_vector(g_v1);
+                else
+                    printf("NULL");
                 printf("\nV2: ");
-                if (g_double_v2) print_vector(g_double_v2); else printf("NULL");
+                if (g_v2 && g_v2->type == GetDoubleFieldInfo())
+                    print_vector(g_v2);
+                else
+                    printf("NULL");
                 printf("\n");
                 break;
         }
     } while(choice != 8);
 }
 
-
-Vector* create_int_vector_interactive(void)
+Vector* create_int_vector_interactive(void) // создание нового вектора int
 {
     int size;
     printf("Введите размер вектора: ");
@@ -310,7 +343,7 @@ Vector* create_int_vector_interactive(void)
     return v;
 }
 
-Vector* create_double_vector_interactive(void)
+Vector* create_double_vector_interactive(void) // создание нового вектора double
 {
     int size;
     printf("Введите размер вектора: ");
@@ -340,55 +373,34 @@ void fill_vector_manual(Vector* v)
 
     printf("Введите %zu элементов:\n", v->size);
 
-    // Определение типа по указателю
-    if (v->type == GetIntFieldInfo())
+    void* temp = malloc(v->type->size);
+    for (size_t i = 0; i < v->size; i++)
     {
-        for (size_t i = 0; i < v->size; i++)
+        int success = 0;
+        while (!success)
         {
-            int val;
             printf("[%zu]: ", i);
-            if (!safe_scan_int(&val))
+            success = v->type->scan(temp);
+            if (!success)
             {
-                printf("Неверный ввод, пропуск элемента\n");
-                continue;
+                printf("Неверный ввод, попробуйте еще раз.\n");
             }
-            VectorSet(v, i, &val);
         }
+        VectorSet(v, i, temp);
     }
-    else if (v->type == GetDoubleFieldInfo())
-    {
-        for (size_t i = 0; i < v->size; i++)
-        {
-            double val;
-            printf("[%zu]: ", i);
-            if (!safe_scan_double(&val))
-            {
-                printf("Неверный ввод, пропуск элемента\n");
-                continue;
-            }
-            VectorSet(v, i, &val);
-        }
-    }
+
+    free(temp);
 }
 
 void fill_vector_auto(Vector* v)
 {
     if (v == NULL) return;
 
-    if (v->type == GetIntFieldInfo())
+    void* temp = malloc(v->type->size);
+    for (size_t i = 0; i < v->size; i++)
     {
-        for (size_t i = 0; i < v->size; i++)
-        {
-            int val = rand() % 21 - 10;  // случ выбор -10.00 до 10.00
-            VectorSet(v, i, &val);
-        }
-    } else if (v->type == GetDoubleFieldInfo())
-    {
-        for (size_t i = 0; i < v->size; i++)
-        {
-            double val = (rand() % 2001 - 1000) / 100.0;  // случ выбор -10.00 до 10.00
-            VectorSet(v, i, &val);
-        }
+        v->type->random(temp);
+        VectorSet(v, i, temp);
     }
+    free(temp);
 }
-
