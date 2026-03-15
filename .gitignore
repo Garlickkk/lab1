@@ -1,0 +1,12 @@
+# IDE
+.idea/
+cmake-build-debug/
+
+# Compiled files
+*.o
+*.exe
+program
+lab1
+
+# System files
+.DS_Store
