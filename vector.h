@@ -13,10 +13,10 @@ typedef struct Vector
 
 Vector* VectorCreate(size_t size, FieldInfo* type);
 void VectorDestroy(Vector* vector);
-void print_vector(Vector* vector);
-void* VectorGet(Vector* vector, size_t index);
-void VectorSet(Vector* vector, size_t index, void* value);
-Vector* VectorAdd(Vector* v1, Vector* v2);
-void VectorDot(Vector* v1, Vector* v2, void* result);
+void print_vector(const Vector* vector);
+void* VectorGet(const Vector* vector, size_t index);
+void VectorSet(Vector* vector, size_t index, const void* value);
+void VectorAdd(const Vector* v1, const Vector* v2, Vector* result);
+void VectorDot(const Vector* v1, const Vector* v2, void* result);
 
 #endif
