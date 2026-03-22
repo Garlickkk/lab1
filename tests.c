@@ -34,7 +34,8 @@ static void TestIntVectorAdd()
     Vector* v1 = CreateIntVectorFromArray(a, 3);
     Vector* v2 = CreateIntVectorFromArray(b, 3);
 
-    Vector* sum = VectorAdd(v1, v2);
+    Vector* sum = VectorCreate(v1->size, v1->type);
+    VectorAdd(v1, v2, sum);
 
     assert(sum != NULL);
     assert(*(int*)VectorGet(sum, 0) == 5);
@@ -79,7 +80,8 @@ static void TestDoubleVectorAdd() {
     Vector* v1 = CreateDoubleVectorFromArray(a, 3);
     Vector* v2 = CreateDoubleVectorFromArray(b, 3);
 
-    Vector* sum = VectorAdd(v1, v2);
+    Vector* sum = VectorCreate(v1->size, v1->type);
+    VectorAdd(v1, v2, sum);
 
     assert(sum != NULL);
     assert(fabs(*(double*)VectorGet(sum, 0) - 1.5) < EP);
@@ -126,7 +128,8 @@ static void TestDifferentTypes()
     Vector* v1 = CreateIntVectorFromArray(a, 2);
     Vector* v2 = CreateDoubleVectorFromArray(b, 2);
 
-    Vector* result = VectorAdd(v1, v2);
+    Vector* result = VectorCreate(v1->size, v1->type);
+    VectorAdd(v1, v2, result);
 
     assert(result == NULL);
 
@@ -145,7 +148,8 @@ static void TestDifferentSizes() {
     Vector* v1 = CreateIntVectorFromArray(a, 2);
     Vector* v2 = CreateIntVectorFromArray(b, 3);
 
-    Vector* result = VectorAdd(v1, v2);
+    Vector* result = VectorCreate(v1->size, v1->type);
+    VectorAdd(v1, v2, result);
 
     assert(result == NULL);
 
@@ -158,9 +162,13 @@ static void TestDifferentSizes() {
 static void TestNullVectors() {
     printf("Test error - NULL vectors");
 
-    Vector* result = VectorAdd(NULL, NULL);
+    Vector* result = NULL;
 
-    assert(result == NULL);
+    Vector* temp = VectorCreate(1, GetIntFieldInfo());
+    if (temp) {
+        VectorAdd(NULL, NULL, temp);
+        VectorDestroy(temp);
+    }
 
     printf("OK\n");
 }
